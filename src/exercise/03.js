@@ -22,6 +22,7 @@ function PokemonInfo({pokemonResource}) {
     </div>
   )
 }
+const SUSPENSE_CONFIG = {timeoutMs: 4000}
 
 // 🐨 create a SUSPENSE_CONFIG variable right here and configure timeoutMs to
 // whatever feels right to you, then try it out and tweak it until you're happy

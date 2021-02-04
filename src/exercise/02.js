@@ -27,7 +27,6 @@ function PokemonInfo({pokemonResource}) {
 function App() {
   const [pokemonName, setPokemonName] = React.useState('')
   const [pokemonResource, setResource] = React.useState(null)
-  // 🐨 add a useState here to keep track of the current pokemonResource
 
   React.useEffect(() => {
     if (!pokemonName) {
