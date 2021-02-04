@@ -29,16 +29,43 @@ const SUSPENSE_CONFIG = {
   busyMinDurationMs: 700,
 }
 
-const pokemonResourceCache = {}
+const PokemonContext = React.createContext()
+PokemonContext.displayName = 'PokemonContext'
 
-function getPokemonResource(pokemonName) {
-  let resource = pokemonResourceCache[pokemonName]
-  if (!resource) {
-    resource = createPokemonResource(pokemonName)
-    pokemonResourceCache[pokemonName] = resource
+function PokemonProvider({children}) {
+  const [pokemonResourceCache, setState] = React.useState({})
+  function getPokemonResource(pokemonName) {
+    let resource = pokemonResourceCache[pokemonName]
+    if (!resource) {
+      resource = createPokemonResource(pokemonName)
+      setState({...pokemonResourceCache, [pokemonName]: resource})
+    }
+    return resource
   }
-  return resource
+  const value = {getPokemonResource}
+  return (
+    <PokemonContext.Provider value={value}>{children}</PokemonContext.Provider>
+  )
 }
+
+function useCacheResource() {
+  const context = React.useContext(PokemonContext)
+  if (context === undefined) {
+    throw new Error(`useCacheResource must be used within a PokemonProvider`)
+  }
+  return context
+}
+//
+// const pokemonResourceCache = {}
+//
+// function getPokemonResource(pokemonName) {
+//   let resource = pokemonResourceCache[pokemonName]
+//   if (!resource) {
+//     resource = createPokemonResource(pokemonName)
+//     pokemonResourceCache[pokemonName] = resource
+//   }
+//   return resource
+// }
 
 function createPokemonResource(pokemonName) {
   return createResource(fetchPokemon(pokemonName))
@@ -48,6 +75,7 @@ function App() {
   const [pokemonName, setPokemonName] = React.useState('')
   const [startTransition, isPending] = React.useTransition(SUSPENSE_CONFIG)
   const [pokemonResource, setPokemonResource] = React.useState(null)
+  const {getPokemonResource} = useCacheResource()
 
   React.useEffect(() => {
     if (!pokemonName) {
@@ -91,4 +119,13 @@ function App() {
   )
 }
 
-export default App
+function Wrapper() {
+  return (
+    <PokemonProvider>
+      {' '}
+      <App />
+    </PokemonProvider>
+  )
+}
+
+export default Wrapper
