@@ -32,16 +32,26 @@ const SUSPENSE_CONFIG = {
 const PokemonContext = React.createContext()
 PokemonContext.displayName = 'PokemonContext'
 
-function PokemonProvider({children}) {
+function PokemonProvider({children, time = 5000}) {
   const [pokemonResourceCache, setState] = React.useState({})
-  function getPokemonResource(pokemonName) {
-    let resource = pokemonResourceCache[pokemonName]
-    if (!resource) {
-      resource = createPokemonResource(pokemonName)
-      setState({...pokemonResourceCache, [pokemonName]: resource})
-    }
-    return resource
-  }
+  const getPokemonResource = React.useCallback(
+    pokemonName => {
+      let resource = pokemonResourceCache[pokemonName]
+      if (!resource) {
+        resource = createPokemonResource(pokemonName)
+        setState({...pokemonResourceCache, [pokemonName]: resource})
+      }
+      return resource
+    },
+    [pokemonResourceCache],
+  )
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setState({})
+    }, time)
+    return () => clearInterval(interval)
+  }, [])
   const value = {getPokemonResource}
   return (
     <PokemonContext.Provider value={value}>{children}</PokemonContext.Provider>
@@ -85,7 +95,7 @@ function App() {
     startTransition(() => {
       setPokemonResource(getPokemonResource(pokemonName))
     })
-  }, [pokemonName, startTransition])
+  }, [getPokemonResource, pokemonName, startTransition])
 
   function handleSubmit(newPokemonName) {
     setPokemonName(newPokemonName)
@@ -121,8 +131,7 @@ function App() {
 
 function Wrapper() {
   return (
-    <PokemonProvider>
-      {' '}
+    <PokemonProvider time={10000}>
       <App />
     </PokemonProvider>
   )
