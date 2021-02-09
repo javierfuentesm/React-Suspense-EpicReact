@@ -19,9 +19,26 @@ import {createResource} from '../utils'
 
 // we need to make a place to store the resources outside of render so
 // 🐨 create "cache" object here.
-
+const cache = {}
 // 🐨 create an Img component that renders a regular <img /> and accepts a src
 // prop and forwards on any remaining props.
+function preloadImage(src) {
+  return new Promise(resolve => {
+    const img = document.createElement('img')
+    img.src = src
+    img.onload = () => resolve(src)
+  })
+}
+
+const Img = props => {
+  let resource = cache[props.src]
+  if (!resource) {
+    resource = createResource(preloadImage(props.src))
+    cache[props.src] = resource
+  }
+  return <img src={resource.read()} {...props} />
+}
+
 // 🐨 The first thing you do in this component is check whether your
 // imgSrcResourceCache already has a resource for the given src prop. If it does
 // not, then you need to create one (💰 using createResource).
@@ -35,7 +52,7 @@ function PokemonInfo({pokemonResource}) {
     <div>
       <div className="pokemon-info__img-wrapper">
         {/* 🐨 swap this img for your new Img component */}
-        <img src={pokemon.image} alt={pokemon.name} />
+        <Img src={pokemon.image} alt={pokemon.name} />
       </div>
       <PokemonDataView pokemon={pokemon} />
     </div>
