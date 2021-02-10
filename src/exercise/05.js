@@ -17,7 +17,9 @@ import {createResource} from '../utils'
 // in your DevTools "Network Tab". We're relying on that cache for this
 // approach to work!
 // ❗❗❗❗
-
+const PokemonInfo = React.lazy(() =>
+  import('../lazy/pokemon-info-render-as-you-fetch'),
+)
 const cache = {}
 
 function preloadImage(src) {
@@ -47,19 +49,19 @@ const Img = props => {
   return <img src={resource.read()} {...props} />
 }
 
-function PokemonInfo({pokemonResource}) {
-  const pokemon = pokemonResource.data.read()
-  return (
-    <div>
-      <div className="pokemon-info__img-wrapper">
-        {/* 🐨 swap this img for your new Img component */}
-        {/*<Img src={pokemon.image} alt={pokemon.name} />*/}
-        <img src={pokemonResource.image.read()} alt={pokemon.name} />
-      </div>
-      <PokemonDataView pokemon={pokemon} />
-    </div>
-  )
-}
+// function PokemonInfo({pokemonResource}) {
+//   const pokemon = pokemonResource.data.read()
+//   return (
+//     <div>
+//       <div className="pokemon-info__img-wrapper">
+//         {/* 🐨 swap this img for your new Img component */}
+//         {/*<Img src={pokemon.image} alt={pokemon.name} />*/}
+//         <img src={pokemonResource.image.read()} alt={pokemon.name} />
+//       </div>
+//       <PokemonDataView pokemon={pokemon} />
+//     </div>
+//   )
+// }
 
 const SUSPENSE_CONFIG = {
   timeoutMs: 4000,
